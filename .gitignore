@@ -20,4 +20,4 @@ expo-env.d.ts
 # @end expo-cli
 
 .venv
-backend/mvlrs_v1
+data
