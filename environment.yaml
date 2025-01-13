@@ -1,0 +1,25 @@
+name: lip-read
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python==3.12
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - pytorch
+  - torchvision
+  - torchaudio
+  - torchmetrics
+  - opencv
+  - pillow
+  - tqdm
+  - optuna
+  - wandb
+  - datasets
+  - ipykernel
+  - pyparsing
+  - flask
+  - flask-cors
