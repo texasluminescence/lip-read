@@ -36,9 +36,11 @@ def train_one_epoch(
         frames = frames.to(device)
         targets = targets.to(device)
 
-        frames = frames.permute(0, 2, 1, 3, 4)  # (B, T, C, H, W) => (B, C, T, H, W)
+        # (batch_size, num_frames, num_channels, height, width) => (batch_size, num_channels, num_frames, height, width)
+        frames = frames.permute(0, 2, 1, 3, 4)
         
-        logits = model(frames) # (batch_size, num_frames, num_classes)
+        # (batch_size, num_frames, num_classes)
+        logits = model(frames)
 
         losses = criterion((logits, input_lengths), (targets, target_lengths))
 
