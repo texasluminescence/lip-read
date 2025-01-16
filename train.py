@@ -3,6 +3,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
 
+import wandb
 from utils.data import BBCNewsVideoDataset, collate_fn_ctc
 from utils.loss import Criterion
 from utils.model import LipNet
@@ -25,20 +26,24 @@ transform = T.Compose([
     T.Resize((50,100)),  # (H, W) 
     T.ToTensor()
 ])
+
 train_dataset = BBCNewsVideoDataset(root_dir, mode='main', transform=transform)
 
 train_dataloader = DataLoader(
     train_dataset,
-    batch_size=4,
+    batch_size=192,
     shuffle=True, 
-    collate_fn=collate_fn_ctc
+    collate_fn=collate_fn_ctc,
+    num_workers=12
 )
+
+wandb.init(project="LipRead", name="Test", tags=("Main"))
 
 train(
     model=model,
     optimizer=optimizer,
     train_dataloader=train_dataloader,
     criterion=criterion,
-    num_epochs=1,
+    num_epochs=10,
     device=device
 )
