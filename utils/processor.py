@@ -1,7 +1,5 @@
-import time
-
 import torch
-from torch.nn import functional as F
+import wandb
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -43,6 +41,8 @@ def train_one_epoch(
         logits = model(frames)
 
         losses = criterion((logits, input_lengths), (targets, target_lengths))
+
+        wandb.log({"Train": {"Loss": losses}}, step=wandb.run.step + len(frames))
 
         loss = losses["overall"]
 

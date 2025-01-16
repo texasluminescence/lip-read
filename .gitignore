@@ -29,4 +29,8 @@ __pycache__/
 
 # Datasets
 data
+
+# Logged runs
+wandb
+
 __pycache__
