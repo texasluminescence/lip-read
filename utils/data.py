@@ -5,17 +5,15 @@ import cv2
 import torch
 from torch.utils.data import Dataset
 
-alphabet = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-blank_idx = 0
-char2idx = {ch: i+1 for i, ch in enumerate(alphabet)} # Leave one blank token for CTC
-idx2char = {v: k for k, v in char2idx.items()}
+ALPHABET = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+char2idx = {character: i + 1 for i, character in enumerate(ALPHABET)} # Leave one blank token for CTC
 
 def text_to_int_sequence(text, char2idx):
     text = text.upper()
     sequence = []
-    for ch in text:
-        if ch in char2idx:
-            sequence.append(char2idx[ch])
+    for char in text:
+        if char in char2idx:
+            sequence.append(char2idx[char])
         # else be blank
     return sequence
     
