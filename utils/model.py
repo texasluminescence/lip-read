@@ -2,7 +2,7 @@ from torch import nn
 from torch.nn import functional as F
 
 
-class LipNetPyTorch(nn.Module):
+class LipNet(nn.Module):
     def __init__(self,
                  img_c=3,
                  img_w=100,
@@ -11,7 +11,7 @@ class LipNetPyTorch(nn.Module):
                  output_size=28,        # number of characters + 1 for blank
                  absolute_max_string_len=32  # not strictly needed in PyTorch model??
                  ):
-        super(LipNetPyTorch, self).__init__()
+        super(LipNet, self).__init__()
         
         # 3D Conv block #1
         self.conv1 = nn.Conv3d(in_channels=img_c,
