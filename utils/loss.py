@@ -40,7 +40,7 @@ class Criterion(nn.Module):
 
         targets, target_lengths = targets
 
-        ctc_loss = self.ctc_loss(prediction_logits, targets, input_lengths, target_lengths)
+        ctc_loss = self.ctc_loss(log_probabilities, targets, input_lengths, target_lengths)
 
         return ctc_loss
     
