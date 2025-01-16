@@ -1,58 +1,72 @@
 import time
 
+import torch
 from torch.nn import functional as F
+from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from utils.loss import Criterion
+from utils.model import LipNet
 
-def train_step(frames, targets, input_lengths, target_lengths, optimizer, ctc_loss, model):
-    frames = frames.cuda()
-    targets = targets.cuda()
 
-    optimizer.zero_grad()
-    
-    # (batch, time, output_size)
-    logits = model(frames)
-    # PyTorch’s CTC wants => (time, batch, class)
-    logits_for_ctc = logits.permute(1, 0, 2)  # => (T, N, C)
-    
-    # Compute log probs
-    log_probs = F.log_softmax(logits_for_ctc, dim=2)
-
-    loss = ctc_loss(log_probs, targets, input_lengths, target_lengths)
-    loss.backward()
-    optimizer.step()
-    return loss.item()
-
-def train_model(model, train_loader, ctc_loss, optimizer, num_epochs=10, device='cuda'):
+def train_one_epoch(
+        model: LipNet,
+        optimizer: Optimizer,
+        train_dataloader: DataLoader,
+        criterion: Criterion,
+        epoch: int,
+        device: torch.device = 'cuda'
+    ) -> None:
     """
     Args:
-        model: your LipNetPyTorch model
-        train_loader: DataLoader yielding (frames, targets, input_lengths, target_lengths)
-        ctc_loss: nn.CTCLoss (or similar)
-        optimizer: e.g. torch.optim.Adam(model.parameters())
-        num_epochs: total epochs to train
-        device: 'cuda' or 'cpu'
+        model: LipNet model
+        optimizer: Optimizer
+        train_dataloader: DataLoader yielding (frames, targets, input_lengths, target_lengths)
+        Criterion: Loss function
+        device: Device to train on
     """
-    
-    model.to(device)
+
     model.train()
+
+    for batch in tqdm(train_dataloader, desc=f"Training (Epoch {epoch})", dynamic_ncols=True):
+        frames, targets, input_lengths, target_lengths = batch
+
+        # Send the inputs and targets to the training device
+        frames = frames.to(device)
+        targets = targets.to(device)
+
+        frames = frames.permute(0, 2, 1, 3, 4)  # (B, T, C, H, W) => (B, C, T, H, W)
+        
+        logits = model(frames) # (batch_size, num_frames, num_classes)
+
+        losses = criterion((logits, input_lengths), (targets, target_lengths))
+
+        loss = losses["overall"]
+
+        loss.backward()
+
+        optimizer.step()
+        optimizer.zero_grad()
+
+def train(
+        model: LipNet, 
+        optimizer: Optimizer, 
+        train_dataloader:  DataLoader, 
+        criterion: Criterion, 
+        num_epochs: int = 10, 
+        device: torch.device = 'cuda'
+    ) -> None:
+    """
+    Args:
+        model: LipNet model
+        optimizer: Optimizer
+        train_dataloader: DataLoader yielding (frames, targets, input_lengths, target_lengths)
+        Criterion: Loss function
+        num_epochs: Number of epochs to train for
+        device: Device to train on
+    """
+    model.to(device)
     
-    for epoch in tqdm(range(num_epochs)):
-        epoch_start = time.time()
-        total_loss = 0.0
-        
-        for batch_idx, (frames, targets, input_lengths, target_lengths) in enumerate(
-            tqdm(train_loader, desc=f"Epoch {epoch+1}", unit="batch")
-        ):
-            # frames shape is (B, T, C, H, W). 
-            # need (B, C, T, H, W) for the model
-            frames = frames.permute(0, 2, 1, 3, 4)  # => (B, C, T, H, W)
-
-            # Perform a single train step
-            loss_value = train_step(frames, targets, input_lengths, target_lengths, optimizer, ctc_loss, model)
-
-            total_loss += loss_value
-        
-        avg_loss = total_loss / len(train_loader)
-        epoch_time = time.time() - epoch_start
-        print(f"Epoch [{epoch+1}/{num_epochs}] took {epoch_time:.2f} seconds, Loss: {avg_loss:.4f}")
+    for epoch in range(num_epochs):
+        train_one_epoch(model, optimizer, train_dataloader, criterion, epoch, device)
