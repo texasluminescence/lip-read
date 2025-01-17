@@ -21,3 +21,4 @@ expo-env.d.ts
 
 .venv
 data
+__pycache__
