@@ -5,9 +5,9 @@ from torchvision import transforms as T
 
 import wandb
 from utils.data import BBCNewsVideoDataset, collate_fn_ctc
-from utils.loss import Criterion
+from machine_learning.src.utils.ctc_loss import Criterion
 from utils.model import LipNet
-from utils.processor import train
+from machine_learning.src.training.train_loop import train
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from src.dataset.BBC_dataset import BBCNewsVideoDataset, collate_fn_ctc
 from src.models.lipnet import LipNet
-from src.training.train_loop import train_model
+from src.training.train_loop import train
 
 if __name__ == "__main__":
     # Define model and training parameters
@@ -61,6 +61,6 @@ if __name__ == "__main__":
     model.load_state_dict(filtered_dict, strict=False)
 
     # Train
-    train_model(model, main_loader, ctc_loss, optimizer, num_epochs=10, device='cuda')
+    train(model, main_loader, ctc_loss, optimizer, num_epochs=10, device='cuda')
     
 # python scripts/run_train.py

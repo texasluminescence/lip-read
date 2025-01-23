@@ -23,3 +23,6 @@ dependencies:
   - pyparsing
   - flask
   - flask-cors
+
+# Make sure to install your machines proper pytorch with cuda, for instance: 
+# conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia
