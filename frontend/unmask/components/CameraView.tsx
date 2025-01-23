@@ -27,7 +27,12 @@ const CameraView: React.FC<{ cameraOpen: boolean, setVideoFrames: React.Dispatch
         let frameCaptureInterval: number | null = null;
         if (cameraOpen && webcamRef.current) {
             frameCaptureInterval = window.setInterval(() => {
-                const imageSrc = webcamRef.current?.getScreenshot();
+                const imageSrc = webcamRef.current?.getScreenshot(
+                    // {
+                    //    width: 100,
+                    //    height: 50
+                    // }
+                );
                 if (imageSrc) // stores latest frame
                     setVideoFrames(prevFrames => [imageSrc, ...prevFrames]);
             }, 100);
