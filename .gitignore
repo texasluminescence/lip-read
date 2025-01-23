@@ -33,4 +33,7 @@ data
 # Logged runs
 wandb
 
+# Virtual environment
+.venv/
+
 __pycache__

@@ -6,11 +6,16 @@ class STCNN(nn.Module):
     Spatiotemporal CNN backbone that produces a (batch, time, feature_dim) output,
     which can be fed into a sequence model (like Bi-GRU).
     """
-    def __init__(self):
+    def __init__(self,
+                 img_c=3,
+                 img_w=100,
+                 img_h=50,
+                 frames_n=75,
+                 ):
         super(STCNN, self).__init__()
 
         # 3D Conv block #1
-        self.conv1 = nn.Conv3d(in_channels=3,
+        self.conv1 = nn.Conv3d(in_channels=img_c,
                                out_channels=32,
                                kernel_size=(3, 5, 5),
                                stride=(1, 2, 2),
@@ -39,33 +44,39 @@ class STCNN(nn.Module):
                                   stride=(1, 2, 2))
         self.drop3 = nn.Dropout(0.5)
 
-        # If your final shape is (batch, 96, T, 3, 6),
-        # then each time-step has 96*3*6=1728 features.
-        self.feature_dim = 96*3*6  # if your input is 100x50 frames
+        # Dimensionality going into the GRUs:
+        # original: (W=100, H=50)
+        # conv1+pool1 => W -> (100/2/2)=25, H->(50/2/2)=12 (accounting for strides/pools)
+        # conv2+pool2 => W -> 25/2=12,   H->12/2=6
+        # conv3+pool3 => W -> 12/2=6,    H->6/2=3
+        # => final is (N, 96, T, 3, 6)
+        # => flattened per frame => 96*3*6 = 1728
+        self.feature_dim = 96*3*6 
 
     def forward(self, x):
         """
-        x shape: (batch, 3, T, H=50, W=100)  [assuming your data is arranged that way]
+        x shape: (batch, channels=3, frames=75, height=50, width=100)
         returns shape: (batch, T, self.feature_dim)
         """
-        # block 1
-        x = self.conv1(x)
+        # (1) 3D conv/pool #1
+        x = self.conv1(x)  # => (batch, 32, frames, H/2, W/2)
         x = F.relu(x)
-        x = self.pool1(x)
+        x = self.pool1(x)  # => (batch, 32, frames, H/4, W/4)
         x = self.drop1(x)
-
-        # block 2
-        x = self.conv2(x)
+        
+        # (2) 3D conv/pool #2
+        x = self.conv2(x)  # => (batch, 64, frames, H/4, W/4)
         x = F.relu(x)
-        x = self.pool2(x)
+        x = self.pool2(x)  # => (batch, 64, frames, H/8, W/8)
         x = self.drop2(x)
-
-        # block 3
-        x = self.conv3(x)
+        
+        # (3) 3D conv/pool #3
+        x = self.conv3(x)  # => (batch, 96, frames, H/8, W/8)
         x = F.relu(x)
-        x = self.pool3(x)
+        x = self.pool3(x)  # => (batch, 96, frames, H/16, W/16)
         x = self.drop3(x)
 
+        # Now flatten the spatial dims but keep the time dim
         # x shape => (batch, 96, T, 3, 6)
         b, c, t, h, w = x.shape
         # reorder => (batch, T, c, h, w)
