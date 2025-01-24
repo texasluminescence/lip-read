@@ -3,14 +3,20 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as T
 import os
+import wandb
+from dotenv import load_dotenv
 
 from torch.utils.data import DataLoader
 
+from src.utils.ctc_loss import Criterion
 from src.dataset.BBC_dataset import BBCNewsVideoDataset, collate_fn_ctc
 from src.models.lipnet import LipNet
 from src.training.train_loop import train
 
 if __name__ == "__main__":
+    # Load .env file
+    load_dotenv()
+
     # Define model and training parameters
     model = LipNet()
 
@@ -23,16 +29,21 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     # Generate DataLoader
-    root_dir = "data/mvlrs_v1"
+    root_dir = "machine_learning/data/mvlrs_v1"
     transform = T.Compose([
         T.ToPILImage(),
         T.Resize((50,100)),  # (H, W)
         T.ToTensor()
     ])
+    
+    # Set up dataloader
+    criterion = Criterion()
+    
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     main_dataset = BBCNewsVideoDataset(root_dir, mode='main', transform=transform)
     print("Main dataset size:", len(main_dataset))
-    main_loader = DataLoader(main_dataset, batch_size=256, shuffle=True, collate_fn=collate_fn_ctc)
+    main_loader = DataLoader(main_dataset, batch_size=256, shuffle=True, collate_fn=collate_fn_ctc, num_workers=12)
 
     # Load Pretrained Parameters if available
     pretrained_dict = {}
@@ -60,7 +71,17 @@ if __name__ == "__main__":
 
     model.load_state_dict(filtered_dict, strict=False)
 
+    # Init wandb
+    wandb.init(project="LipRead", name="Test", tags=("Main"))
+    
     # Train
-    train(model, main_loader, ctc_loss, optimizer, num_epochs=10, device='cuda')
+    train(
+        model=model,
+        optimizer=optimizer,
+        train_dataloader=main_loader,
+        criterion=criterion,
+        num_epochs=100,
+        device=device
+    )
     
 # python scripts/run_train.py
