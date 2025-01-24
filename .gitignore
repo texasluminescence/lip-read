@@ -38,3 +38,6 @@ wandb
 
 # lip_read package
 lip_read.egg-info
+
+# Environment file
+.env
