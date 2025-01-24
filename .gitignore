@@ -35,3 +35,6 @@ wandb
 
 # Virtual environment
 .venv/
+
+# lip_read package
+lip_read.egg-info
