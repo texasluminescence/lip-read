@@ -43,3 +43,6 @@ checkpoints
 
 # Package metadata
 lip_read.egg-info
+
+# Environment file
+.env
