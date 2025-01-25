@@ -1,5 +1,5 @@
 import torch
-from utils.ctc_decode import greedy_decode_ctc
+from src.utils.ctc_decode import greedy_decode_ctc
 
 def run_inference_single(model, frames, idx2char=None, blank_idx=0, device='cuda'):
     """

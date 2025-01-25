@@ -27,12 +27,12 @@ def load_video_frames(path, max_frames=75):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--video_path", type=str, required=True)
-    parser.add_argument("--model_ckpt", type=str, default="lipnet.pth")
+    parser.add_argument("--model_ckpt", type=str, default="checkpoints/lipnet_epoch_1.pth")
     args = parser.parse_args()
 
     # Load model
     model = LipNet()
-    model.load_state_dict(torch.load(args.model_ckpt))
+    model.load_state_dict(torch.load(args.model_ckpt, weights_only=True)["model_state_dict"])
     model.cuda()
 
     # Prep frames
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     print("Prediction:", pred[0])
 
 
-# python scripts/run_inference.py --video_path data/mvlrs_v1/main/00001.mp4 --model_ckpt lipnet.pth
+# python scripts/run_inference.py --video_path data/mvlrs_v1/main/5535415699068794046/00001.mp4 --model_ckpt checkpoints/lipnet_epoch_1.pth
