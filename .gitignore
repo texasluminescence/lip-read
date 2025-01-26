@@ -18,3 +18,17 @@ frontend/unmask/web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Datasets
+data
+
+# Logged runs
+wandb
