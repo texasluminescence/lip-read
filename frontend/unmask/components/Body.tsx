@@ -1,52 +1,120 @@
-import { Text, View } from "react-native";
-import CameraView from "@/components/CameraView";
-import { useState } from "react";
-import { ScrollView } from "react-native-gesture-handler";
+"use client"
+
+import React, { useState, useEffect } from "react"
+import CameraView from "./CameraView"
+import SideBar from "./SideBar"
 
 export default function Body() {
-  const [cameraOpen, setCameraOpen] = useState(true);
-  const [videoFrames, setVideoFrames] = useState<string[]>([]);
+  const [isRecording, setIsRecording] = useState(false)
+  const [transcription, setTranscription] = useState<string[]>([])
+  const [hasCameraPermission, setHasCameraPermission] = useState(false)
+  const [videoFrames, setVideoFrames] = useState<string[]>([])
+
+  useEffect(() => {
+    const checkCameraPermission = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: true })
+        setHasCameraPermission(true)
+      } catch (error) {
+        setHasCameraPermission(false)
+        console.error("Error accessing camera:", error)
+      }
+    }
+
+    checkCameraPermission()
+  }, [])
+
+  useEffect(() => {
+    if (!isRecording) return
+
+    // simulating token streaming for transcription
+    const transcriptionInterval = setInterval(() => {
+      setTranscription((prev) => [...prev, "word"])
+    }, 200)
+
+    return () => {
+      clearInterval(transcriptionInterval)
+    }
+  }, [isRecording])
+
+  const handleFrame = (imageSrc: string) => {
+    setVideoFrames((prevFrames) => [imageSrc, ...prevFrames.slice(0, 4)])
+  }
+
+  const toggleRecording = () => {
+    setIsRecording(!isRecording)
+    if (!isRecording) {
+      setTranscription([])
+    }
+  }
+
   return (
-    <ScrollView
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: 10,
-        justifyContent: "center",
+    <div
+      style={{
+        height: "100vh",
+        width: "100%",
+        backgroundColor: "#fefae0",
+        color: "#283618",
+        display: "flex",
+        flexDirection: "column",
         alignItems: "center",
+        padding: "2rem",
       }}
     >
-      <div style={{ width: '60vw', height: '60vw' }}>
-        <CameraView cameraOpen={cameraOpen} setVideoFrames={setVideoFrames} />
-      </div>
-      <button style={{ width: '240px', height: '40px'}}>
-        <span 
-          style={{ fontSize: '25px' }}
-          onClick={() => {setCameraOpen(prev => !prev);}}
+      <h1
+        style={{
+          fontSize: "3rem",
+          fontWeight: "bold",
+          color: "#606c38",
+          marginBottom: "2rem",
+        }}
+      >
+        Unmask
+      </h1>
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          maxWidth: "1300px",
+          backgroundColor: "rgba(221, 161, 94, 0.1)",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          borderRadius: "1rem",
+          overflow: "hidden",
+          backdropFilter: "blur(10px)",
+          border: "1px solid #bc6c25",
+        }}
+      >
+        <div
+          style={{
+            flex: "1",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          {cameraOpen ? "Close Camera" : "Open Camera"}
-        </span>
-      </button>
-      <div style={{ marginTop: '50px' }}>
-        <h3 style={{ textAlign: 'center' }}> Latest 12 Frames </h3>
-        {<div style={{ 
-            height: '100%', 
-            display: 'flex', 
-            flexDirection: 'row', 
-            flexWrap: 'wrap', 
-            padding: '10', 
-            justifyContent: 'center' 
-        }}>
-          {videoFrames.slice(0, 12).map((frame, index) => {
-            return <div key={index} style={{ display: 'flex', flexDirection: 'column', margin: 5 }}> 
-              <span>frame: {videoFrames.length - index}</span>
-              <img 
-                src={frame}
-                style={{ height: '150px', width: '200px' }}
-              />
-            </div>
-          })}
-        </div>}
+          <CameraView hasCameraPermission={hasCameraPermission} isRecording={isRecording} onFrame={handleFrame} />
+          <button
+            onClick={toggleRecording}
+            disabled={!hasCameraPermission}
+            style={{
+              padding: "0.75rem",
+              fontSize: "1.125rem",
+              fontWeight: "600",
+              color: "#fefae0",
+              backgroundColor: isRecording ? "#bc6c25" : "#606c38",
+              border: "none",
+              borderRadius: "0.5rem",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+            }}
+          >
+            {isRecording ? "Stop Recording" : "Start Recording"}
+          </button>
+        </div>
+
+        <SideBar transcription={transcription} videoFrames={videoFrames} />
       </div>
-    </ScrollView>
-  );
+    </div>
+  )
 }
