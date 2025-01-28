@@ -51,4 +51,4 @@ if __name__ == "__main__":
     print("Prediction:", pred[0])
 
 
-# python scripts/run_inference.py --video_path data/mvlrs_v1/main/5535415699068794046/00001.mp4 --model_ckpt checkpoints/lipnet_epoch_1.pth
+# python machine_learning/scripts/run_inference.py --video_path machine_learning/data/mvlrs_v1/main/5535415699068794046/00001.mp4 --model_ckpt machine_learning/checkpoints/lipnet_epoch_1.pth
