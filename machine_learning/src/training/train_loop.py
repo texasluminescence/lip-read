@@ -69,7 +69,7 @@ def train(
         criterion: Criterion, 
         num_epochs: int = 10, 
         device: torch.device = 'cuda',
-        checkpoint_dir: str = "checkpoints"
+        checkpoint_dir: str = "machine_learning/checkpoints"
     ) -> None:
     """
     Args:
@@ -89,7 +89,7 @@ def train(
         print(f"Epoch [{epoch+1}/{num_epochs}] - Avg Train Loss: {avg_loss:.4f}")
 
         # Save model checkpoint after each epoch
-        checkpoint_path = os.path.join(checkpoint_dir, f"machine_learning/lipnet_epoch_{epoch+1}.pth")
+        checkpoint_path = os.path.join(checkpoint_dir, f"lipnet_epoch_{epoch+1}.pth")
         torch.save({
             "epoch": epoch,
             "model_state_dict": model.state_dict(),

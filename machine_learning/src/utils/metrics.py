@@ -1,5 +1,5 @@
 import torch
-from utils.ctc_decode import greedy_decode_ctc
+from src.utils.ctc_decode import greedy_decode_ctc
 
 def compute_accuracy(model, frames, targets, input_lengths, target_lengths, blank_idx=0, device='cuda'):
     """

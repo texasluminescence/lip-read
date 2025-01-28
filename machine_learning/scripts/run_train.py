@@ -72,7 +72,7 @@ if __name__ == "__main__":
     model.load_state_dict(filtered_dict, strict=False)
 
     # Init wandb
-    wandb.init(project="LipRead", name="Test", tags=("Main"))
+    wandb.init(project="LipRead", name="100 Epoch no pretrain", tags=("Main"))
     
     # Train
     train(
