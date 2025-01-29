@@ -4,18 +4,7 @@ import os
 import cv2
 import torch
 from torch.utils.data import Dataset
-
-ALPHABET = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-char2idx = {character: i + 1 for i, character in enumerate(ALPHABET)} # Leave one blank token for CTC
-
-def text_to_int_sequence(text, char2idx):
-    text = text.upper()
-    sequence = []
-    for char in text:
-        if char in char2idx:
-            sequence.append(char2idx[char])
-        # else be blank
-    return sequence
+from src.utils.tokenizer import text_to_int_sequence
     
 class BBCNewsVideoDataset(Dataset):
     """
@@ -150,7 +139,7 @@ def collate_fn_ctc(batch):
         frames_list.append(video_tensor)
         input_lengths.append(video_tensor.shape[0])
 
-        numeric_seq = text_to_int_sequence(txt, char2idx)
+        numeric_seq = text_to_int_sequence(txt)
         target_lengths.append(len(numeric_seq))
         targets_list.append(torch.tensor(numeric_seq, dtype=torch.long))
 

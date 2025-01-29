@@ -1,3 +1,4 @@
+from src.utils.metrics import compute_accuracy
 import torch
 import wandb
 from torch.optim import Optimizer
@@ -15,7 +16,8 @@ def train_one_epoch(
         train_dataloader: DataLoader,
         criterion: Criterion,
         epoch: int,
-        device: torch.device = 'cuda'
+        device: torch.device = 'cuda',
+        log_accuracy: bool = False
     ) -> None:
     """
     Args:
@@ -28,6 +30,7 @@ def train_one_epoch(
 
     model.train()
     total_loss = 0.0
+    total_accuracy = 0.0
     num_samples = 0
 
     for batch in tqdm(train_dataloader, desc=f"Training (Epoch {epoch})", dynamic_ncols=True):
@@ -45,8 +48,6 @@ def train_one_epoch(
 
         losses = criterion((logits, input_lengths), (targets, target_lengths))
 
-        wandb.log({"Train": {"Loss": losses}}, step=wandb.run.step + len(frames))
-
         loss = losses["overall"]
 
         loss.backward()
@@ -59,8 +60,23 @@ def train_one_epoch(
         total_loss += loss.item() * batch_size
         num_samples += batch_size
         
+        if log_accuracy:
+            accuracy = compute_accuracy(logits, targets, input_lengths, target_lengths)
+            total_accuracy += accuracy * batch_size
+            wandb.log({
+                "Train": {
+                    "Loss": loss.item(),
+                    "Accuracy": accuracy
+                }
+            })
+        else:
+            wandb.log({"Train": {"Loss": loss.item()}})
+        
     avg_loss = total_loss / num_samples if num_samples > 0 else 0.0
-    return avg_loss
+    avg_accuracy = 0.0
+    if log_accuracy and num_samples > 0:
+        avg_accuracy = total_accuracy / num_samples
+    return avg_loss, avg_accuracy
 
 def train(
         model: LipNet, 
@@ -69,7 +85,8 @@ def train(
         criterion: Criterion, 
         num_epochs: int = 10, 
         device: torch.device = 'cuda',
-        checkpoint_dir: str = "machine_learning/checkpoints"
+        checkpoint_dir: str = "machine_learning/checkpoints",
+        log_accuracy: bool = False
     ) -> None:
     """
     Args:
@@ -84,9 +101,12 @@ def train(
     model.to(device)
     
     for epoch in range(num_epochs):
-        avg_loss = train_one_epoch(model, optimizer, train_dataloader, criterion, epoch, device)
+        avg_loss, avg_acc = train_one_epoch(model, optimizer, train_dataloader, criterion, epoch, device, log_accuracy)
 
-        print(f"Epoch [{epoch+1}/{num_epochs}] - Avg Train Loss: {avg_loss:.4f}")
+        if log_accuracy:
+            print(f"Epoch [{epoch+1}/{num_epochs}] - Avg Train Loss: {avg_loss:.4f}, Avg Acc: {avg_acc:.4f}")
+        else:
+            print(f"Epoch [{epoch+1}/{num_epochs}] - Avg Train Loss: {avg_loss:.4f}")
 
         # Save model checkpoint after each epoch
         checkpoint_path = os.path.join(checkpoint_dir, f"lipnet_epoch_{epoch+1}.pth")

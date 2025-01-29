@@ -81,7 +81,8 @@ if __name__ == "__main__":
         train_dataloader=main_loader,
         criterion=criterion,
         num_epochs=100,
-        device=device
+        device=device,
+        log_accuracy=True
     )
     
 # python scripts/run_train.py

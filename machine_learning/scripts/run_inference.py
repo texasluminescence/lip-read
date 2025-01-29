@@ -1,11 +1,10 @@
-# scripts/run_inference.py
-
 import argparse
 import torch
 import torchvision.transforms as T
 import cv2
 
 from src.training.inference import run_inference_single
+from src.utils.tokenizer import int_to_text_sequence
 from src.models.lipnet import LipNet
 
 def load_video_frames(path, max_frames=75):
@@ -48,7 +47,7 @@ if __name__ == "__main__":
 
     # Run inference
     pred = run_inference_single(model, frames_tensor, idx2char=None, blank_idx=0, device='cuda')
-    print("Prediction:", pred[0])
+    print("Prediction:", int_to_text_sequence(pred[0]))
 
 
-# python machine_learning/scripts/run_inference.py --video_path machine_learning/data/mvlrs_v1/main/5535415699068794046/00001.mp4 --model_ckpt machine_learning/checkpoints/lipnet_epoch_1.pth
+# python machine_learning/scripts/run_inference.py --video_path machine_learning/data/mvlrs_v1/main/5535415699068794046/00001.mp4 --model_ckpt machine_learning/checkpoints/lipnet_epoch_100.pth
