@@ -1,14 +1,16 @@
 import type React from "react"
 import { useEffect, useRef } from "react"
 import Webcam from "react-webcam"
+import GuideLines from "./GuideLines"
 
 interface CameraViewProps {
   hasCameraPermission: boolean
   isRecording: boolean
+  guideLinesActive: boolean
   onFrame: (imageSrc: string) => void
 }
 
-const CameraView: React.FC<CameraViewProps> = ({ hasCameraPermission, isRecording, onFrame }) => {
+const CameraView: React.FC<CameraViewProps> = ({ hasCameraPermission, isRecording, guideLinesActive, onFrame }) => {
   const webcamRef = useRef<Webcam>(null)
 
   useEffect(() => {
@@ -54,19 +56,22 @@ const CameraView: React.FC<CameraViewProps> = ({ hasCameraPermission, isRecordin
           <p>Camera permission not granted</p>
         </div>
       ) : (
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-          screenshotFormat="image/jpeg"
-          videoConstraints={{
-            facingMode: "user",
-          }}
-        />
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{
+              facingMode: "user",
+            }}
+          />
+          <GuideLines guideLinesActive={guideLinesActive} />
+        </div>
       )}
     </div>
   )

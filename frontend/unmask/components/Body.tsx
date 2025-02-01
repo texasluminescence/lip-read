@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react"
 import CameraView from "./CameraView"
 import SideBar from "./SideBar"
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
 
 export default function Body() {
   const [isRecording, setIsRecording] = useState(false)
+  const [guideLinesActive, setGuideLinesActive] = useState(true)
   const [transcription, setTranscription] = useState<string[]>([])
   const [hasCameraPermission, setHasCameraPermission] = useState(false)
   const [videoFrames, setVideoFrames] = useState<string[]>([])
@@ -40,10 +43,9 @@ export default function Body() {
   }
 
   const toggleRecording = () => {
-    setIsRecording(!isRecording)
-    if (!isRecording) {
+    if (!isRecording)
       setTranscription([])
-    }
+    setIsRecording(!isRecording)
   }
 
   return (
@@ -91,24 +93,56 @@ export default function Body() {
             flexDirection: "column",
           }}
         >
-          <CameraView hasCameraPermission={hasCameraPermission} isRecording={isRecording} onFrame={handleFrame} />
-          <button
-            onClick={toggleRecording}
-            disabled={!hasCameraPermission}
-            style={{
-              padding: "0.75rem",
-              fontSize: "1.125rem",
-              fontWeight: "600",
-              color: "#fefae0",
-              backgroundColor: isRecording ? "#bc6c25" : "#606c38",
-              border: "none",
-              borderRadius: "0.5rem",
-              cursor: "pointer",
-              transition: "background-color 0.3s ease",
-            }}
-          >
-            {isRecording ? "Stop Recording" : "Start Recording"}
-          </button>
+          <CameraView 
+            hasCameraPermission={hasCameraPermission} 
+            isRecording={isRecording} 
+            guideLinesActive={guideLinesActive}
+            onFrame={handleFrame} 
+          />
+          <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+            <button
+              onClick={toggleRecording}
+              disabled={!hasCameraPermission}
+              style={{
+                padding: "0.75rem",
+                fontSize: "1.125rem",
+                fontWeight: "600",
+                width: "85%",
+                color: "#fefae0",
+                backgroundColor: isRecording ? "#bc6c25" : "#606c38",
+                border: "none",
+                borderRadius: "0.5rem",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease",
+              }}
+            >
+              {isRecording ? "Stop Recording" : "Start Recording"}
+            </button>
+            <button
+            onClick={() => { setGuideLinesActive(!guideLinesActive) }}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "0.75rem",
+                fontSize: "1.125rem",
+                fontWeight: "600",
+                marginLeft: "0.5rem",
+                width: "10%",
+                color: "#fefae0",
+                backgroundColor: !guideLinesActive ? "#bc6c25" : "#606c38",
+                border: "none",
+                borderRadius: "0.5rem",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease",
+              }}
+            >
+              {guideLinesActive ? 
+                <FaRegEyeSlash style={{ width: "100%" }} /> : 
+                <FaRegEye style={{ width: "100%" }} />
+              }
+            </button>
+          </div>
         </div>
 
         <SideBar transcription={transcription} videoFrames={videoFrames} />
