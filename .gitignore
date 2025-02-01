@@ -32,3 +32,20 @@ data
 
 # Logged runs
 wandb
+
+# Virtual environment
+.venv/
+
+__pycache__
+
+# Training checkpoints
+checkpoints
+
+# Package metadata
+lip_read.egg-info
+
+# Environment file
+.env
+
+# Checkpoints
+checkpoints
