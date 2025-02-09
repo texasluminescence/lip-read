@@ -39,7 +39,7 @@ export default function Body() {
   }, [isRecording])
 
   const handleFrame = (imageSrc: string) => {
-    setVideoFrames((prevFrames) => [imageSrc, ...prevFrames.slice(0, 4)])
+    setVideoFrames((prevFrames) => [imageSrc, ...prevFrames.slice(0, 149)])
   }
 
   const toggleRecording = () => {
@@ -145,7 +145,7 @@ export default function Body() {
           </div>
         </div>
 
-        <SideBar transcription={transcription} videoFrames={videoFrames} />
+        <SideBar transcription={transcription} videoFrames={videoFrames.slice(0, 5)} />
       </div>
     </div>
   )

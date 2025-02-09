@@ -17,11 +17,14 @@ const CameraView: React.FC<CameraViewProps> = ({ hasCameraPermission, isRecordin
     if (!hasCameraPermission || !isRecording) return
 
     const frameCaptureInterval = window.setInterval(() => {
-      const imageSrc = webcamRef.current?.getScreenshot()
-      if (imageSrc) {
+      const imageSrc = webcamRef.current?.getScreenshot({
+        width: 100,
+        height: 50
+      })
+      
+      if (imageSrc)
         onFrame(imageSrc)
-      }
-    }, 100)
+    }, 40)
 
     return () => {
       clearInterval(frameCaptureInterval)
