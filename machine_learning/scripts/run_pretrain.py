@@ -24,4 +24,4 @@ if __name__ == "__main__":
         out_path=args.out_path
     )
     
-# python scripts/run_pretrain.py --root_dir data/mvlrs_v1 --epochs 5 --batch_size 64 --num_classes 28
+# python machine_learning/scripts/run_pretrain.py --root_dir machine_learning/data/mvlrs_v1/pretrain --epochs 5 --batch_size 64 --num_classes 28
