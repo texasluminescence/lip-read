@@ -1,14 +1,14 @@
-frontend/unmask/node_modules/
-frontend/unmask/.expo/
-frontend/unmask/dist/
-frontend/unmask/npm-debug.*
-frontend/unmask/*.jks
-frontend/unmask/*.p8
-frontend/unmask/*.p12
-frontend/unmask/*.key
-frontend/unmask/*.mobileprovision
-frontend/unmask/*.orig.*
-frontend/unmask/web-build/
+frontend/node_modules/
+frontend/.expo/
+frontend/dist/
+frontend/npm-debug.*
+frontend/*.jks
+frontend/*.p8
+frontend/*.p12
+frontend/*.key
+frontend/*.mobileprovision
+frontend/*.orig.*
+frontend/web-build/
 
 # macOS
 .DS_Store

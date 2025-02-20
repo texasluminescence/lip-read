@@ -69,7 +69,7 @@ export default function Body() {
           marginBottom: "2rem",
         }}
       >
-        Unmask
+        LipSeek
       </h1>
 
       <div
