@@ -1,0 +1,48 @@
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# WORKDIR /app # SHOULD I DELETE THIS SHIT
+
+# Set the locale to avoid issues with Python and pip
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# Install system dependencies and git
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.8 python3.8-distutils build-essential git wget libgl1-mesa-glx libglib2.0-0 && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3.8 get-pip.py && \
+    rm get-pip.py && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create a symlink so that "python" points to Python 3.8
+# RUN ln -s /usr/bin/python3.8 /usr/bin/python
+
+# Copy the requirements file and install dependencies
+COPY requirements.txt /app/backend/requirements.txt
+RUN pip install --upgrade pip && pip install --ignore-installed --no-cache-dir -r /app/backend/requirements.txt
+RUN pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+
+# Download checkpoints:
+# - Feature extractor goes into vtp_lipreading/feature_extractors
+# - LRS3 checkpoint goes into vtp_lipreading/checkpoints
+RUN mkdir -p /app/src/vtp_lipreading/vtp_lipreading/feature_extractors && \
+    mkdir -p /app/src/vtp_lipreading/vtp_lipreading/checkpoints && \
+    cd /app/src/vtp_lipreading/vtp_lipreading/feature_extractors && \
+    wget https://www.robots.ox.ac.uk/~vgg/research/vtp-for-lip-reading/checkpoints/public_train_data/feature_extractor.pth && \
+    cd /app/src/vtp_lipreading/vtp_lipreading/checkpoints && \
+    wget https://www.robots.ox.ac.uk/~vgg/research/vtp-for-lip-reading/checkpoints/public_train_data/ft_lrs3.pth
+
+# Copy the rest of the backend code
+COPY . /app/backend
+
+EXPOSE 5000
+
+WORKDIR /app/backend
+
+CMD ["bash", "run.sh"]
