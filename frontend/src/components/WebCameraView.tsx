@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Platform, AppState } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 
 interface WebCameraViewProps {
   onVideoRecorded: (uri: string) => void;
@@ -16,10 +17,54 @@ const WebCameraView: React.FC<WebCameraViewProps> = ({ onVideoRecorded }) => {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const chunks = useRef<Blob[]>([]);
-
-  // Start the camera when component mounts
+  const isFocused = useIsFocused();
+  
+  // Handle app state changes (background/foreground)
   useEffect(() => {
-    setupCamera();
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState !== 'active' && cameraStream) {
+        // Stop camera when app goes to background
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      } else if (nextAppState === 'active' && !cameraStream && isFocused) {
+        // Restart camera when app comes to foreground and screen is focused
+        setupCamera();
+      }
+    });
+    
+    // Add browser visibility change event for web
+    const handleVisibilityChange = () => {
+      if (document.hidden && cameraStream) {
+        // Stop camera when tab is not visible
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      } else if (!document.hidden && !cameraStream && isFocused) {
+        // Restart camera when tab becomes visible and screen is focused
+        setupCamera();
+      }
+    };
+    
+    if (Platform.OS === 'web') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+
+    return () => {
+      subscription.remove();
+      if (Platform.OS === 'web') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
+  }, [cameraStream, isFocused]);
+
+  // Start/stop camera based on screen focus
+  useEffect(() => {
+    if (isFocused) {
+      setupCamera();
+    } else if (cameraStream) {
+      // Stop camera when screen loses focus
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
     
     // Cleanup when component unmounts
     return () => {
@@ -27,7 +72,7 @@ const WebCameraView: React.FC<WebCameraViewProps> = ({ onVideoRecorded }) => {
         cameraStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [facingMode]);
+  }, [isFocused, facingMode]);
 
   const setupCamera = async () => {
     try {
