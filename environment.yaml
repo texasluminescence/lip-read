@@ -1,4 +1,4 @@
-name: lip-read
+name: lipseek
 channels:
   - conda-forge
   - pytorch

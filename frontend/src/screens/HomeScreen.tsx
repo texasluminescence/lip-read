@@ -18,7 +18,7 @@ const HomeScreen: React.FC = () => {
       
       <View style={styles.header}>
         <Text style={styles.title}>LipSeek</Text>
-        <Text style={styles.subtitle}>Video Lip Reading App</Text>
+        <Text style={styles.subtitle}>Lip Reading App</Text>
       </View>
       
       <View style={styles.content}>
