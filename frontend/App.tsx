@@ -8,7 +8,7 @@ import { RootStackParamList } from './src/types/navigation';
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
 import RecordScreen from './src/screens/RecordScreen';
-import PickVideoScreen from './src/screens/PickVideoScreen';
+// Removed PickVideoScreen since we're handling upload directly from HomeScreen
 import PreviewScreen from './src/screens/PreviewScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,7 +27,6 @@ export default function App() {
         >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Record" component={RecordScreen} />
-          <Stack.Screen name="PickVideo" component={PickVideoScreen} />
           <Stack.Screen name="Preview" component={PreviewScreen} />
         </Stack.Navigator>
       </NavigationContainer>

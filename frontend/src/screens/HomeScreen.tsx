@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { selectVideoFromLibrary } from '../services/platform-media';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -43,10 +44,19 @@ const HomeScreen: React.FC = () => {
         
         <TouchableOpacity 
           style={[styles.button, styles.secondaryButton]}
-          onPress={() => navigation.navigate('PickVideo')}
+          onPress={async () => {
+            try {
+              const uri = await selectVideoFromLibrary();
+              if (uri) {
+                navigation.navigate('Preview', { uri });
+              }
+            } catch (error) {
+              console.error('Error selecting video:', error);
+            }
+          }}
         >
-          <MaterialIcons name="photo-library" size={24} color="white" />
-          <Text style={styles.buttonText}>Choose from Library</Text>
+          <MaterialIcons name="file-upload" size={24} color="white" />
+          <Text style={styles.buttonText}>Upload Video</Text>
         </TouchableOpacity>
       </View>
     </View>
