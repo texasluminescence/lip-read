@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import CameraView from '../components/CameraView';
+import PlatformCameraView from '../components/PlatformCameraView';
 import { RootStackParamList } from '../types/navigation';
 
 type RecordScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Record'>;
@@ -20,7 +20,7 @@ const RecordScreen: React.FC = () => {
     <View style={styles.container}>
       <StatusBar style="light" />
       
-      <CameraView onVideoRecorded={handleVideoRecorded} />
+      <PlatformCameraView onVideoRecorded={handleVideoRecorded} />
       
       <TouchableOpacity 
         style={styles.backButton}

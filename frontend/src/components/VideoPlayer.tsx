@@ -5,10 +5,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 interface VideoPlayerProps {
   uri: string;
-  onClose: () => void;
+  onClose?: () => void;
+  style?: any;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, onClose }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, onClose, style }) => {
   const [status, setStatus] = useState({});
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -22,7 +23,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, onClose }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <Video
         style={styles.video}
         source={{ uri }}
@@ -34,9 +35,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ uri, onClose }) => {
       />
       
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <MaterialIcons name="close" size={24} color="white" />
-        </TouchableOpacity>
+        {onClose && (
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <MaterialIcons name="close" size={24} color="white" />
+          </TouchableOpacity>
+        )}
         
         <TouchableOpacity style={styles.playButton} onPress={togglePlayPause}>
           <MaterialIcons

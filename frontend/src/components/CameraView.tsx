@@ -13,7 +13,6 @@ interface CameraViewProps {
 
 const CameraView: React.FC<CameraViewProps> = ({ onVideoRecorded }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
   const [facing, setFacing] = useState<CameraType>('front');
   const cameraRef = useRef<ExpoCameraView>(null);
 
@@ -27,29 +26,12 @@ const CameraView: React.FC<CameraViewProps> = ({ onVideoRecorded }) => {
     }
   }, [permission]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (countdown !== null && countdown > 0) {
-      interval = setInterval(() => {
-        setCountdown(prev => (prev !== null ? prev - 1 : null));
-      }, 1000);
-    } else if (countdown === 0) {
-      setCountdown(null);
-      startRecording();
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [countdown]);
-
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
 
   const prepareRecording = () => {
-    setCountdown(3);
+    startRecording();
   };
 
   const startRecording = async () => {
@@ -98,11 +80,6 @@ const CameraView: React.FC<CameraViewProps> = ({ onVideoRecorded }) => {
     <View style={styles.container}>
       <ExpoCameraView ref={cameraRef} style={styles.camera} facing={facing} mode="video">
         <View style={styles.controlsContainer}>
-          {countdown !== null && (
-            <View style={styles.countdownContainer}>
-              <Text style={styles.countdownText}>{countdown}</Text>
-            </View>
-          )}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.iconButton}
@@ -120,7 +97,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onVideoRecorded }) => {
               <TouchableOpacity
                 style={styles.recordButton}
                 onPress={prepareRecording}
-                disabled={countdown !== null}
+                disabled={isRecording}
               />
             )}
             <View style={styles.iconButton} />
@@ -168,16 +145,6 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  countdownContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  countdownText: {
-    fontSize: 100,
-    color: 'white',
-    fontWeight: 'bold',
   },
 });
 

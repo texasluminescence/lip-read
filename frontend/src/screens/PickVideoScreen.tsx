@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import * as MediaLibrary from 'expo-media-library';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import { checkMediaLibraryPermissions, getVideosFromLibrary, selectVideoFromLibrary } from '../services/platform-media';
 
 type PickVideoScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'PickVideo'>;
 
@@ -22,10 +22,17 @@ const PickVideoScreen: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      // Special case for web platform - show a button to pick a file instead of library
+      if (Platform.OS === 'web') {
+        setHasPermission(true);
+        setLoading(false);
+        return;
+      }
       
-      if (status === 'granted') {
+      const granted = await checkMediaLibraryPermissions();
+      setHasPermission(granted);
+      
+      if (granted) {
         loadVideos();
       } else {
         setLoading(false);
@@ -34,11 +41,11 @@ const PickVideoScreen: React.FC = () => {
   }, []);
 
   const loadVideos = async () => {
+    // Skip this on web platform
+    if (Platform.OS === 'web') return;
+    
     try {
-      const media = await MediaLibrary.getAssetsAsync({
-        mediaType: MediaLibrary.MediaType.video,
-        sortBy: [MediaLibrary.SortBy.creationTime],
-      });
+      const media = await getVideosFromLibrary();
       
       // Get thumbnails for videos
       const videosWithThumbnails: VideoAsset[] = await Promise.all(
@@ -60,6 +67,20 @@ const PickVideoScreen: React.FC = () => {
       console.error('Error loading videos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Web file picker handler
+  const handleWebFilePicker = async () => {
+    if (Platform.OS !== 'web') return;
+    
+    try {
+      const uri = await selectVideoFromLibrary();
+      if (uri) {
+        navigation.navigate('Preview', { uri });
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
     }
   };
 
@@ -102,6 +123,13 @@ const PickVideoScreen: React.FC = () => {
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#4285F4" />
+        </View>
+      ) : Platform.OS === 'web' ? (
+        <View style={styles.center}>
+          <TouchableOpacity style={styles.webPickButton} onPress={handleWebFilePicker}>
+            <MaterialIcons name="upload-file" size={48} color="#4285F4" />
+            <Text style={styles.webPickButtonText}>Select a video file</Text>
+          </TouchableOpacity>
         </View>
       ) : videos.length === 0 ? (
         <View style={styles.center}>
@@ -215,6 +243,25 @@ const styles = StyleSheet.create({
   noVideosText: {
     fontSize: 16,
     color: '#666',
+  },
+  webPickButton: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 250,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  webPickButtonText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
   },
 });
 

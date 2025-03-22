@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import VideoPlayer from '../components/VideoPlayer';
+import PlatformVideoPlayer from '../components/PlatformVideoPlayer';
 import { RootStackParamList } from '../types/navigation';
 import { uploadVideo } from '../services/api';
 
@@ -44,7 +44,7 @@ const PreviewScreen: React.FC = () => {
       <StatusBar style="light" />
       
       <View style={styles.videoContainer}>
-        <VideoPlayer uri={uri} onClose={() => {}} />
+        <PlatformVideoPlayer uri={uri} />
       </View>
       
       <View style={styles.content}>
